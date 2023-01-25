@@ -1,0 +1,279 @@
+{
+	"info": {
+		"_postman_id": "325a66ba-e6aa-44fd-ad2e-90ce7ff9b91c",
+		"name": "Maps API",
+		"description": "### This collection imitates working with areas and places (e.g. buildings, parks, houses, etc) that could be add into a map app, update or remove. These actions are based on four basic requests, which are actually nothing more than standard CRUD methods: POST, GET, PUT, DELETE and each of them will be reviewed closely below.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22139076"
+	},
+	"item": [
+		{
+			"name": "Add  place",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jData = pm.response.json(); // assign the http-response as the 'jData' variable\r",
+							"\r",
+							"let placeID = jData.place_id; // assign the place_id value from the http-response as the 'placeID' variable\r",
+							"\r",
+							"pm.collectionVariables.set(\"place_id\", placeID); // set a collection variable with the 'placeID' value \r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"location\": {\r\n    \"lat\": -38.383494,\r\n    \"lng\": 33.427362\r\n  },\r\n  \"accuracy\": 51,\r\n  \"name\": \"Frontline house\",\r\n  \"phone_number\": \"(+91) 983 893 3937\",\r\n  \"address\": \"Nemtsov street, 270215\",\r\n  \"types\": [\r\n    \"flat\",\r\n    \"park\"\r\n  ],\r\n  \"website\": \"https://www.google.com\",\r\n  \"language\": \"English\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/maps/api/place/add/json?key=qaclick123",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"maps",
+						"api",
+						"place",
+						"add",
+						"json"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "qaclick123"
+						}
+					]
+				},
+				"description": "## *Sending data of a new place through the request's body*"
+			},
+			"response": []
+		},
+		{
+			"name": "Check place",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jData = pm.response.json(); // assign the http-response as the 'jData' variable\r",
+							"let address = jData.address; // assign the address value from the http-response as the 'address' variable\r",
+							"let exp_address = pm.collectionVariables.get(\"place_address\"); // assign the coolection variable place_address as a 'exp_address'\r",
+							"let placeID = pm.collectionVariables.get(\"place_id\"); // assign the coolection variable place_id as a 'placeID'\r",
+							"\r",
+							"\r",
+							"pm.test(\"Check address\", function () {\r",
+							"    if (placeID != null){ // If the place_id exists\r",
+							"        if (address === exp_address){ // and if the current address matches the address, which was set as a collection variable\r",
+							"        console.log ('The address of the place is correct') &\r",
+							"        postman.setNextRequest('Update place'); // then next request should be 'Update place'\r",
+							"        } else console.log ('The address of the place was changed') &\r",
+							"        postman.setNextRequest('Delete place'); // if the addresses doesn't match then next request should be 'Delete place' \r",
+							"    } else console.log ('The place was deleted') & \r",
+							"    postman.setNextRequest(null); // If the place_id doesn't exist at all then the collection running must be stopped \r",
+							"});   \r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/maps/api/place/get/json?key=qaclick123&place_id={{place_id}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"maps",
+						"api",
+						"place",
+						"get",
+						"json"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "qaclick123"
+						},
+						{
+							"key": "place_id",
+							"value": "{{place_id}}"
+						}
+					]
+				},
+				"description": "## *Defining details of an added or updated place*"
+			},
+			"response": []
+		},
+		{
+			"name": "Update place",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jData = pm.response.json(); // assign the http-response as the 'jData' variable\r",
+							"let msg = jData.msg; // assign the msg value from the http-response as the 'msg' variable\r",
+							"\r",
+							"pm.test(\"Check address\", function () {\r",
+							"    if (msg === \"Address successfully updated\"){ // if the updating is successful \r",
+							"        postman.setNextRequest('Check place')} // then the collection running jump to the 'Check place' request \r",
+							"    else postman.setNextRequest(null); // if something's wrong then the collection running must be stopped\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"key\":\"qaclick123\",\r\n  \"place_id\":\"{{place_id}}\", \r\n  \"address\":\"Politkovskaya street, 071006\"\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/maps/api/place/update/json",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"maps",
+						"api",
+						"place",
+						"update",
+						"json"
+					]
+				},
+				"description": "## *Allows to change only a place address through the request's body*"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete place",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jData = pm.response.json(); // assign the http-response as the 'jData' variable\r",
+							"let status = jData.status; // assign the status value from the http-response as the 'status' variable\r",
+							"\r",
+							"pm.test(\"Check status\", function () {\r",
+							"    pm.expect(status).to.eql('OK'); // checking up whether the removing is successful\r",
+							"});\r",
+							"\r",
+							"pm.collectionVariables.set(\"place_id\", null); // drop the collection variable\r",
+							"\r",
+							"postman.setNextRequest('Check place'); // jump to the 'Check place' request to define that the place was truly deleted"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"place_id\":\"{{place_id}}\"\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/maps/api/place/delete/json",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"maps",
+						"api",
+						"place",
+						"delete",
+						"json"
+					]
+				},
+				"description": "## *Removing a place from the app's database*"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "URL",
+			"value": "https://rahulshettyacademy.com",
+			"type": "string"
+		},
+		{
+			"key": "place_id",
+			"value": "d965a5c91d7499b8b5e3620c392de4e2"
+		},
+		{
+			"key": "place_address",
+			"value": "Nemtsov street, 270215",
+			"type": "string"
+		}
+	]
+}
